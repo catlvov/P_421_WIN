@@ -10,13 +10,18 @@ using System.Windows.Forms;
 
 namespace Clock
 {
+	
 	public partial class MainForm : Form
 	{
-		public MainForm()
+        ColorDialog backgroundColorDialog;
+		ColorDialog foregroundColorDialog;
+        public MainForm()
 		{
 			InitializeComponent();
 			tsmiShowControls.Checked = true;
-		}
+			backgroundColorDialog = new ColorDialog();
+            foregroundColorDialog = new ColorDialog();
+        }
 
 		private void timer_Tick(object sender, EventArgs e)
 		{
@@ -67,16 +72,24 @@ namespace Clock
         private void notifyIcon_DoubleClick(object sender, EventArgs e)
         {
 			if (this.TopMost)
-			{
+            {
+                this.TopMost = true;
                 this.TopMost = false;
             }
         }
-
-        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        private void tsmiBackgroundColor_Click(object sender, EventArgs e)
         {
-			if (this.TopMost)
+			if(backgroundColorDialog.ShowDialog() == DialogResult.OK)
 			{
-				this.TopMost = true;
+				labelTime.BackColor = backgroundColorDialog.Color;
+			}
+        }
+
+        private void tsmoForegroundColor_Click(object sender, EventArgs e)
+        {
+			if(foregroundColorDialog.ShowDialog() == DialogResult.OK)
+			{
+				labelTime.ForeColor = foregroundColorDialog.Color;
 			}
         }
     }
