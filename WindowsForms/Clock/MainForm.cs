@@ -15,6 +15,7 @@ namespace Clock
 		public MainForm()
 		{
 			InitializeComponent();
+			tsmiShowControls.Checked = true;
 		}
 
 		private void timer_Tick(object sender, EventArgs e)
@@ -43,7 +44,40 @@ namespace Clock
 
 		private void labelTime_DoubleClick(object sender, EventArgs e)
 		{
-			SetVisibility(true);
+			SetVisibility(tsmiShowControls.Checked = true);
 		}
-	}
+
+        private void tsmiTopmost_CheckedChanged(object sender, EventArgs e) =>
+			this.TopMost = tsmiTopmost.Checked;
+
+		private void tsmiShowControls_CheckedChanged(object sender, EventArgs e) => SetVisibility(tsmiShowControls.Checked);
+
+        private void tsmiClose_Click(object sender, EventArgs e) => this.Close();
+
+        //ShowWeekday
+        private void tsmiShowWeekday_CheckedChanged(object sender, EventArgs e) => cbShowWeekday.Checked = tsmiShowWeekday.Checked;
+
+        private void cbShowWeekday_CheckedChanged(object sender, EventArgs e) => tsmiShowWeekday.Checked = cbShowWeekday.Checked;
+
+        //ShowDate
+        private void tsmiShowDate_CheckedChanged(object sender, EventArgs e) => cbShowDate.Checked = tsmiShowDate.Checked;
+
+		private void cbShowDate_CheckedChanged(object sender, EventArgs e) => tsmiShowDate.Checked = cbShowDate.Checked;
+
+        private void notifyIcon_DoubleClick(object sender, EventArgs e)
+        {
+			if (this.TopMost)
+			{
+                this.TopMost = false;
+            }
+        }
+
+        private void notifyIcon_MouseClick(object sender, MouseEventArgs e)
+        {
+			if (this.TopMost)
+			{
+				this.TopMost = true;
+			}
+        }
+    }
 }
