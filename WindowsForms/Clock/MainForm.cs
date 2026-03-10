@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.IO;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace Clock
 {
@@ -12,13 +13,14 @@ namespace Clock
     {
         private ColorDialog backgroundColorDialog;
         private ColorDialog foregroundColorDialog;
+        private FontDialog fontDialog;
         private Font customClockFont;
         private const string AppName = "DigitalClock";
 
         public MainForm()
         {
             InitializeComponent();
-
+            AllocConsole();
             try
             {
                 PrivateFontCollection privateFonts = new PrivateFontCollection();
@@ -40,14 +42,18 @@ namespace Clock
                 labelTime.Font = new Font("Arial", 35f, FontStyle.Bold);
             }
 
+            this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - this.Width - 25, 50);
+
             tsmiAutostart.Checked = IsAutostartEnabled();
 
             tsmiShowControls.Checked = true;
             backgroundColorDialog = new ColorDialog();
             foregroundColorDialog = new ColorDialog();
+            fontDialog = new FontDialog(this);
 
-            this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - this.Width - 25, 50);
         }
+        [DllImport("Kernel32.dll")]
+        public static extern bool AllocConsole();
 
         private void timer_Tick(object sender, EventArgs e)
         {
@@ -154,6 +160,10 @@ namespace Clock
             }
         }
         private void cbAutostart_CheckedChanged(object sender, EventArgs e) => SetAutostart(tsmiAutostart.Checked);
-        
+
+        private void tsmiFont_Click(object sender, EventArgs e)
+        {
+            fontDialog.ShowDialog();
+        }
     }
 }
