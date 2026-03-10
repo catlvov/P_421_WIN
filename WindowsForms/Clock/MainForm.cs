@@ -22,11 +22,11 @@ namespace Clock
             try
             {
                 PrivateFontCollection privateFonts = new PrivateFontCollection();
-                privateFonts.AddFontFile("C:\\Fonts\\Digital.ttf");
+                privateFonts.AddFontFile("C:\\Users\\catlvov\\Source\\Repos\\P_421_WIN\\WindowsForms\\Clock\\Fronts\\Warnationbold.ttf");
 
                 if (privateFonts.Families.Length > 0)
                 {
-                    customClockFont = new Font(privateFonts.Families[0], 48f, FontStyle.Regular);
+                    customClockFont = new Font(privateFonts.Families[0], 35f, FontStyle.Regular);
                     labelTime.Font = customClockFont;
                 }
                 else
@@ -45,6 +45,8 @@ namespace Clock
             tsmiShowControls.Checked = true;
             backgroundColorDialog = new ColorDialog();
             foregroundColorDialog = new ColorDialog();
+
+            this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - this.Width - 25, 50);
         }
 
         private void timer_Tick(object sender, EventArgs e)
