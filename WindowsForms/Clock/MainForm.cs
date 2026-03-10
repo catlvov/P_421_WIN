@@ -20,6 +20,8 @@ namespace Clock
 			SetVisibility(tsmiShowControls.Checked = false);
 			backgroundColorDialog = new ColorDialog();
 			foregroundColorDialog = new ColorDialog();
+
+			this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - this.Width - 25, 50);
 		}
 
 		private void timer_Tick(object sender, EventArgs e)
