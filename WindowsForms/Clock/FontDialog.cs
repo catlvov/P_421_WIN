@@ -18,7 +18,8 @@ namespace Clock
 		public FontDialog()
 		{
 			InitializeComponent();
-			LoadFonts();
+			//LoadFonts();
+			Traverse($"{Application.ExecutablePath}\\..\\..\\..\\Fonts");
 		}
 		public FontDialog(MainForm parent):this()
 		{
@@ -28,6 +29,15 @@ namespace Clock
 		private void FontDialog_Load(object sender, EventArgs e)
 		{
 			this.Location = new Point(parent.Location.X - this.Width / 3, parent.Location.Y + 80);
+		}
+		void Traverse(string path)
+		{
+			Console.WriteLine(path);
+			LoadFonts(path, "*.ttf");
+			LoadFonts(path, "*.otf");
+			string[] directories = Directory.GetDirectories(path);
+			for (int i = 0; i < directories.Length; i++)
+				Traverse(directories[i]);
 		}
 		void LoadFonts()
 		{
