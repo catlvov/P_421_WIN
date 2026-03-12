@@ -15,11 +15,15 @@ namespace Clock
 	public partial class FontDialog : Form
 	{
 		MainForm parent;
+		Dictionary<string, string> d_fonts;	
+		//Словарь (Дерево) - это стуктура данных, которая хранит множество пар <Ключ - Значение>  <Key - Value>
 		public FontDialog()
 		{
 			InitializeComponent();
 			//LoadFonts();
+			d_fonts = new Dictionary<string, string>();
 			Traverse($"{Application.ExecutablePath}\\..\\..\\..\\Fonts");
+			comboBoxFonts.Items.AddRange(d_fonts.Keys.ToArray());
 		}
 		public FontDialog(MainForm parent):this()
 		{
@@ -53,14 +57,16 @@ namespace Clock
 			string[] files = Directory.GetFiles(path, format);
 			for (int i = 0; i < files.Length; i++)
 			{
-				files[i] = files[i].Split('\\').Last();
+				d_fonts.Add(files[i].Split('\\').Last(), files[i]);
+				//files[i] = files[i].Split('\\').Last();
 			}
-			comboBoxFonts.Items.AddRange(files);
+			//comboBoxFonts.Items.AddRange(files);
 		}
 		void ApplyFontExample()
 		{
 			PrivateFontCollection pfc = new PrivateFontCollection();
-			pfc.AddFontFile(comboBoxFonts.SelectedItem.ToString());
+			pfc.AddFontFile(d_fonts[comboBoxFonts.SelectedItem.ToString()]);
+			//pfc.AddFontFile(comboBoxFonts.SelectedItem.ToString());
 			labelExample.Font = new Font(pfc.Families[0], (float)nudFontSize.Value);
 		}
 		private void comboBoxFonts_SelectedIndexChanged(object sender, EventArgs e)
