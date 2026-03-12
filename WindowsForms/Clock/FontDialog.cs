@@ -19,7 +19,8 @@ namespace Clock
         public FontDialog()
         {
             InitializeComponent();
-            LoadFonts();
+            //LoadFonts();
+            Traverse($"{Application.ExecutablePath}\\..\\..\\..\\Fonts");
         }
         public FontDialog(MainForm parent) : this()
         {
@@ -37,10 +38,18 @@ namespace Clock
             Directory.SetCurrentDirectory($"{Application.ExecutablePath}\\..\\..\\..\\Fronts");
             Console.WriteLine(Directory.GetCurrentDirectory());
             // string[] files = Directory.GetFiles(Directory.GetCurrentDirectory());
-            LoadFronts(Directory.GetCurrentDirectory(), "*.ttf");
-            LoadFronts(Directory.GetCurrentDirectory(), "*.otf");
+            LoadFonts(Directory.GetCurrentDirectory(), "*.ttf");
+            LoadFonts(Directory.GetCurrentDirectory(), "*.otf");
         }
-        void LoadFronts(string path,string format)
+        void Traverse(string path)
+        {
+            Console.WriteLine(path);
+            LoadFonts(path, "*.ttf");
+            LoadFonts(path, "*.otf");
+            string[] directories = Directory.GetDirectories(path);
+            for (int i = 0; i < directories.Length; ++i) Traverse(directories[i]);
+        }
+        void LoadFonts(string path,string format)
         {
             string[] files = Directory.GetFiles(path, format);
             for (int i = 0; i < files.Length; i++)
