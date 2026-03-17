@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.IO; //in/out 
+using System.Diagnostics;
 
 using Microsoft.Win32;
 
@@ -22,13 +24,14 @@ namespace Clock
 		{
 			InitializeComponent();
 			AllocConsole();
-			SetVisibility(tsmiShowControls.Checked = false);
 			this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - this.Width - 25, 50);
 			backgroundColorDialog = new ColorDialog();
 			foregroundColorDialog = new ColorDialog();
 			fontDialog = new FontDialog(this);
-
+			loadSettings();
+			SetVisibility(tsmiShowControls.Checked);
 		}
+
 		[DllImport("kernel32.dll")]
 		public static extern bool AllocConsole();
 		private void timer_Tick(object sender, EventArgs e)
@@ -122,5 +125,53 @@ namespace Clock
 			else rk.DeleteValue(key_name, false);
 			rk.Dispose();
 		}
-	}
+
+		void SaveSettings()
+		{
+            //string fileName = "Settings.ini";
+            string fileName = $"{Application.ExecutablePath}\\..\\..\\..\\Settings.ini";
+            StreamWriter writer = new StreamWriter(fileName);
+
+			writer.WriteLine($"{this.Location.X}x{this.Location.Y}");
+            writer.WriteLine(tsmiTopmost.Checked);
+            writer.WriteLine(tsmiShowControls.Checked);
+            writer.WriteLine(tsmiShowDate.Checked);
+            writer.WriteLine(tsmiShowWeekday.Checked);
+			writer.WriteLine(tsmiAutostart.Checked);
+            writer.WriteLine(fontDialog.FontFile);
+			writer.WriteLine(labelTime.BackColor.ToArgb());
+			writer.WriteLine(labelTime.ForeColor.ToArgb());
+
+            writer.Close();
+
+			Process.Start("notepad.exe", fileName);
+		}
+
+		void loadSettings()
+		{
+			try
+			{
+				string fileName = $"{Application.ExecutablePath}\\..\\..\\..\\Settings.ini";
+				StreamReader reader = new StreamReader(fileName);
+
+				string[] pos = reader.ReadLine().Split('x');
+				this.Location = new Point(Convert.ToInt16(pos.First()), Convert.ToUInt16(pos.Last()));
+				tsmiTopmost.Checked = bool.Parse(reader.ReadLine());
+				tsmiShowControls.Checked = bool.Parse(reader.ReadLine());
+				tsmiShowDate.Checked = bool.Parse(reader.ReadLine());
+				tsmiShowWeekday.Checked = bool.Parse(reader.ReadLine());
+				tsmiAutostart.Checked = bool.Parse(reader.ReadLine());
+				fontDialog.FontFile = reader.ReadLine();
+				labelTime.BackColor = backgroundColorDialog.Color = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
+				labelTime.ForeColor = backgroundColorDialog.Color = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
+				reader.Close();
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(this, ex.Message, "info",MessageBoxButtons.OK, MessageBoxIcon.Information);
+			}
+        }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e) => SaveSettings();
+    }
 }
