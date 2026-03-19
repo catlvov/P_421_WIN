@@ -111,13 +111,17 @@ namespace Clock
 			//						  как самую обычную открытую переменную.
 		}
 
-		private void tsmiFont_Click(object sender, EventArgs e)
-		{
-			if (fontDialog.ShowDialog() == DialogResult.OK)
-				labelTime.Font = fontDialog.Font;
-		}
 
-		private void tsmiAutostart_CheckedChanged(object sender, EventArgs e)
+        private void tsmiFont_Click(object sender, EventArgs e)
+        {
+            if (fontDialog.ShowDialog() == DialogResult.OK)
+            {
+                labelTime.Font = fontDialog.Font;
+                fontDialog.Font = labelTime.Font;
+            }
+        }
+
+        private void tsmiAutostart_CheckedChanged(object sender, EventArgs e)
 		{
 			string key_name = "Clock_P_421";
 			RegistryKey rk = Registry.CurrentUser.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run", true);
@@ -126,50 +130,80 @@ namespace Clock
 			rk.Dispose();
 		}
 
-		void SaveSettings()
-		{
-            //string fileName = "Settings.ini";
-            string fileName = $"{Application.ExecutablePath}\\..\\..\\..\\Settings.ini";
-            StreamWriter writer = new StreamWriter(fileName);
+        void SaveSettings()
+        {
+            string fileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Settings.ini");
 
-			writer.WriteLine($"{this.Location.X}x{this.Location.Y}");
-            writer.WriteLine(tsmiTopmost.Checked);
-            writer.WriteLine(tsmiShowControls.Checked);
-            writer.WriteLine(tsmiShowDate.Checked);
-            writer.WriteLine(tsmiShowWeekday.Checked);
-			writer.WriteLine(tsmiAutostart.Checked);
-            writer.WriteLine(fontDialog.FontFile);
-			writer.WriteLine(labelTime.BackColor.ToArgb());
-			writer.WriteLine(labelTime.ForeColor.ToArgb());
+            using (StreamWriter writer = new StreamWriter(fileName))
+            {
+                writer.WriteLine($"{this.Location.X}x{this.Location.Y}");
+                writer.WriteLine(tsmiTopmost.Checked);
+                writer.WriteLine(tsmiShowControls.Checked);
+                writer.WriteLine(tsmiShowDate.Checked);
+                writer.WriteLine(tsmiShowWeekday.Checked);
+                writer.WriteLine(tsmiAutostart.Checked);
 
-            writer.Close();
+                if (labelTime.Font != null)
+                {
+                    writer.WriteLine(labelTime.Font.Name);
+                    writer.WriteLine(labelTime.Font.Size);
+                    writer.WriteLine((int)labelTime.Font.Style);
+                }
+                else
+                {
+                    writer.WriteLine("Segoe UI"); 
+                    writer.WriteLine(12);
+                    writer.WriteLine(0);
+                }
 
-			Process.Start("notepad.exe", fileName);
-		}
+                writer.WriteLine(labelTime.BackColor.ToArgb());
+                writer.WriteLine(labelTime.ForeColor.ToArgb());
+            }
+        }
 
-		void loadSettings()
-		{
-			try
-			{
-				string fileName = $"{Application.ExecutablePath}\\..\\..\\..\\Settings.ini";
-				StreamReader reader = new StreamReader(fileName);
 
-				string[] pos = reader.ReadLine().Split('x');
-				this.Location = new Point(Convert.ToInt16(pos.First()), Convert.ToUInt16(pos.Last()));
-				tsmiTopmost.Checked = bool.Parse(reader.ReadLine());
-				tsmiShowControls.Checked = bool.Parse(reader.ReadLine());
-				tsmiShowDate.Checked = bool.Parse(reader.ReadLine());
-				tsmiShowWeekday.Checked = bool.Parse(reader.ReadLine());
-				tsmiAutostart.Checked = bool.Parse(reader.ReadLine());
-				fontDialog.FontFile = reader.ReadLine();
-				labelTime.BackColor = backgroundColorDialog.Color = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-				labelTime.ForeColor = backgroundColorDialog.Color = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
-				reader.Close();
-			}
-			catch (Exception ex)
-			{
-				MessageBox.Show(this, ex.Message, "info",MessageBoxButtons.OK, MessageBoxIcon.Information);
-			}
+        void loadSettings()
+        {
+            try
+            {
+                string fileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Settings.ini");
+
+                if (!File.Exists(fileName))
+                    return; 
+
+                using (StreamReader reader = new StreamReader(fileName))
+                {
+                    string[] pos = reader.ReadLine().Split('x');
+                    this.Location = new Point(int.Parse(pos[0]), int.Parse(pos[1]));
+
+                    tsmiTopmost.Checked = bool.Parse(reader.ReadLine());
+                    tsmiShowControls.Checked = bool.Parse(reader.ReadLine());
+                    tsmiShowDate.Checked = bool.Parse(reader.ReadLine());
+                    tsmiShowWeekday.Checked = bool.Parse(reader.ReadLine());
+                    tsmiAutostart.Checked = bool.Parse(reader.ReadLine());
+
+                    try
+                    {
+                        string fontName = reader.ReadLine();
+                        float fontSize = float.Parse(reader.ReadLine());
+                        FontStyle fontStyle = (FontStyle)Enum.Parse(typeof(FontStyle), reader.ReadLine());
+
+                        labelTime.Font = new Font(fontName, fontSize, fontStyle);
+                    }
+                    catch
+                    {
+                        labelTime.Font = new Font("Segoe UI", 12);
+                    }
+
+                    labelTime.BackColor = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
+                    labelTime.ForeColor = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, $"Ошибка загрузки настроек: {ex.Message}", "Ошибка",
+                              MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e) => SaveSettings();
