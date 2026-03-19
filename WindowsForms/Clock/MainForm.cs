@@ -12,6 +12,7 @@ using System.IO; //in/out
 using System.Diagnostics;
 
 using Microsoft.Win32;
+using System.Windows.Forms.VisualStyles;
 
 namespace Clock
 {
@@ -27,7 +28,7 @@ namespace Clock
 			this.Location = new Point(Screen.PrimaryScreen.Bounds.Width - this.Width - 25, 50);
 			backgroundColorDialog = new ColorDialog();
 			foregroundColorDialog = new ColorDialog();
-			fontDialog = new FontDialog(this);
+			//fontDialog = new FontDialog(this);
 			loadSettings();
 			SetVisibility(tsmiShowControls.Checked);
 		}
@@ -132,7 +133,7 @@ namespace Clock
 
         void SaveSettings()
         {
-            string fileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Settings.ini");
+            string fileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), $"{Application.ExecutablePath}\\..\\..\\..\\Settings.ini");
 
             using (StreamWriter writer = new StreamWriter(fileName))
             {
@@ -145,14 +146,13 @@ namespace Clock
 
                 if (labelTime.Font != null)
                 {
-                    writer.WriteLine(labelTime.Font.Name);
-                    writer.WriteLine(labelTime.Font.Size);
-                    writer.WriteLine((int)labelTime.Font.Style);
+                    writer.WriteLine(fontDialog.FontFile);
+                    writer.WriteLine(fontDialog.NUDFontSize.Value);
                 }
                 else
                 {
                     writer.WriteLine("Segoe UI"); 
-                    writer.WriteLine(12);
+                    writer.WriteLine(30);
                     writer.WriteLine(0);
                 }
 
@@ -166,9 +166,10 @@ namespace Clock
         {
             try
             {
-                string fileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), "Settings.ini");
+                string fileName = Path.Combine(Path.GetDirectoryName(Application.ExecutablePath), $"{Application.ExecutablePath}\\..\\..\\..\\Settings.ini");
 
-                if (!File.Exists(fileName))
+
+				if (!File.Exists(fileName))
                     return; 
 
                 using (StreamReader reader = new StreamReader(fileName))
@@ -184,15 +185,12 @@ namespace Clock
 
                     try
                     {
-                        string fontName = reader.ReadLine();
-                        float fontSize = float.Parse(reader.ReadLine());
-                        FontStyle fontStyle = (FontStyle)Enum.Parse(typeof(FontStyle), reader.ReadLine());
-
-                        labelTime.Font = new Font(fontName, fontSize, fontStyle);
+                        fontDialog = new FontDialog(this, reader.ReadLine(), Convert.ToDecimal(reader.ReadLine()));
+						labelTime.Font = fontDialog.Font;
                     }
                     catch
                     {
-                        labelTime.Font = new Font("Segoe UI", 12);
+                        labelTime.Font = new Font("Segoe UI", 30);
                     }
 
                     labelTime.BackColor = Color.FromArgb(Convert.ToInt32(reader.ReadLine()));

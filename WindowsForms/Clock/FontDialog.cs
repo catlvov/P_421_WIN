@@ -19,6 +19,7 @@ namespace Clock
 		//Словарь (Дерево) - это стуктура данных, которая хранит множество пар <Ключ - Значение>  <Key - Value>
 		public Font Font { get; set; }	//Объявляем Автоствойства 'Font', типа 'Font';
 		public string FontFile {  get; set; }
+		public NumericUpDown NUDFontSize { get => nudFontSize;}
 		public FontDialog()
 		{
 			InitializeComponent();
@@ -27,9 +28,15 @@ namespace Clock
 			Traverse($"{Application.ExecutablePath}\\..\\..\\..\\Fonts");
 			comboBoxFonts.Items.AddRange(d_fonts.Keys.ToArray());
 		}
-		public FontDialog(MainForm parent):this()
+		public FontDialog(MainForm parent,string fontfile = "", decimal size = 32):this()
 		{
 			this.parent = parent;
+			this.FontFile = fontfile;
+			Console.WriteLine(FontFile);
+			comboBoxFonts.SelectedItem = fontfile.Split('\\').Last();
+			nudFontSize.Value = size;
+			ApplyFontExample();
+			this.Font = labelExample.Font;
 		}
 
 		private void FontDialog_Load(object sender, EventArgs e)
